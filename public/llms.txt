@@ -1,0 +1,14 @@
+# Allo Partner API
+
+> You host one HTTPS URL. Allo calls it with a phone number. You answer with JSON.
+
+Version: 2026-08-01
+
+## Pages
+
+- [Full spec](/spec.md)
+- [Overview](/)
+- [Verify endpoint](/verify)
+- [Authentication](/auth)
+- [Health check](/health)
+- [Error codes](/errors)

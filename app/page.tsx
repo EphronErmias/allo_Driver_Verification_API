@@ -1,0 +1,86 @@
+import type { Metadata } from "next";
+import { CodeBlock } from "@/components/CodeBlock";
+import { FlowDiagram } from "@/components/FlowDiagram";
+import { Table } from "@/components/Table";
+import {
+  API_VERSION,
+  CHECKLIST,
+  EXAMPLE_HEALTH_URL,
+  EXAMPLE_VERIFY_URL,
+  RATE_LIMIT_TEXT,
+} from "@/content/spec";
+
+export const metadata: Metadata = {
+  title: "Overview",
+  description: "You host one HTTPS URL. Allo calls it with a phone number. You answer with JSON.",
+};
+
+export default function OverviewPage() {
+  return (
+    <article>
+      <h1 className="text-2xl font-semibold tracking-tight">What you build</h1>
+      <p className="mt-4 text-[15px] leading-7 text-muted">
+        Allo finances mobile phones in Ethiopia. When one of your drivers applies for Allo
+        financing, Allo verifies they are an active, tenured driver on your platform. You host one
+        HTTPS endpoint — Allo calls it with a phone number, and you respond with JSON.
+      </p>
+
+      <FlowDiagram />
+
+      <ol className="mt-8 list-decimal space-y-3 pl-5 text-[15px] leading-7 text-muted">
+        <li>Give Allo an HTTPS URL (example below).</li>
+        <li>Create an API key and give it to Allo.</li>
+        <li>Optional: take Allo&apos;s signing secret and verify the Signature header.</li>
+      </ol>
+
+      <h2 className="mt-10 text-lg font-semibold">The two URLs</h2>
+      <Table
+        columns={["Method", "URL", "Purpose"]}
+        rows={[
+          ["POST", EXAMPLE_VERIFY_URL, "Check a driver by phone"],
+          ["GET", EXAMPLE_HEALTH_URL, "Liveness check (Allo appends /health)"],
+        ]}
+      />
+      <CodeBlock code={EXAMPLE_VERIFY_URL} label="your HTTPS URL" />
+
+      {/* HTTPS callout — inline, once, instead of site-wide banner */}
+      <div className="my-4 rounded-lg border border-accent/30 bg-accent/5 px-4 py-3">
+        <p className="text-sm text-muted">
+          <span className="mr-1.5 font-medium text-accent">Note:</span>
+          Your URL must start with{" "}
+          <code className="font-mono text-accent">https://</code>. When this doc says
+          &quot;return HTTP 200,&quot; that is a status code — your server still uses HTTPS.
+        </p>
+      </div>
+
+      <p className="text-[15px] leading-7 text-muted">
+        Version <code className="font-mono text-accent">{API_VERSION}</code> is sent as{" "}
+        <code className="font-mono text-accent">X-Allo-API-Version</code>. Allo waits 8 seconds for
+        a driver check and 5 seconds for health. If your server errors or times out, Allo retries
+        once after 1 second. A 401 or other 4xx is not retried.
+      </p>
+
+      <h2 className="mt-10 text-lg font-semibold">Rate limits</h2>
+      <p className="mt-3 text-[15px] leading-7 text-muted">{RATE_LIMIT_TEXT}</p>
+
+      <h2 className="mt-10 text-lg font-semibold">Before you go live</h2>
+      <ol className="mt-4 list-decimal space-y-2 pl-5 text-[15px] leading-7 text-muted">
+        {CHECKLIST.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ol>
+
+      <p className="mt-8 text-[15px] leading-7 text-muted">
+        For coding tools:{" "}
+        <a className="text-accent underline-offset-2 hover:underline" href="/spec.md">
+          /spec.md
+        </a>{" "}
+        and{" "}
+        <a className="text-accent underline-offset-2 hover:underline" href="/llms.txt">
+          /llms.txt
+        </a>
+        .
+      </p>
+    </article>
+  );
+}

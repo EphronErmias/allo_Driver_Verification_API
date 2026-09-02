@@ -18,10 +18,10 @@ export default function ErrorsPage() {
         <strong>401</strong> only if the key or signature is wrong.
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">Reason codes</h2>
+      <h2 className="mt-10 text-lg font-semibold">Response codes</h2>
       <Table
-        columns={["reason", "When to use"]}
-        rows={REASONS.map((r) => [r.reason, r.when])}
+        columns={["code", "reason", "When to use"]}
+        rows={REASONS.map((r) => [String(r.code), r.reason, r.when])}
       />
 
       <h2 className="mt-10 text-lg font-semibold">What Allo does with your response</h2>

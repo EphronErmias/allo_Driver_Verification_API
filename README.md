@@ -1,6 +1,8 @@
 # Allo Driver Verification API docs
 
-Static Next.js site for the Feres / Yango / BeU **HTTPS** driver-verify contract. No database. No env vars.
+Static Next.js site for the partner **HTTPS** driver-verify contract. No database. No env vars. Copyable backend snippets live on `/auth`.
+
+Partner-neutral by design: the pages say `{PARTNER}`, never a specific platform name.
 
 A copy of this site also lives in the Allo app repo under `partner-api-docs/`. This repo is the Vercel deploy source.
 

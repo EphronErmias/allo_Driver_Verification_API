@@ -7,6 +7,7 @@ import {
   CHECKLIST,
   EXAMPLE_HEALTH_URL,
   EXAMPLE_VERIFY_URL,
+  HANDOVER,
   RATE_LIMIT_TEXT,
 } from "@/content/spec";
 
@@ -27,11 +28,21 @@ export default function OverviewPage() {
 
       <FlowDiagram />
 
-      <ol className="mt-8 list-decimal space-y-3 pl-5 text-[15px] leading-7 text-muted">
-        <li>Give Allo an HTTPS URL (example below).</li>
-        <li>Create an API key and give it to Allo.</li>
-        <li>Optional: take Allo&apos;s signing secret and verify the Signature header.</li>
-      </ol>
+      <p className="mt-8 text-[15px] leading-7 text-muted">
+        The important part: <strong>Allo calls you. You never call Allo.</strong> You build one
+        endpoint and wait. When a driver applies, Allo asks you one question — is this phone
+        number an active driver on your platform? — and you answer yes or no.
+      </p>
+
+      <h2 className="mt-10 text-lg font-semibold">What changes hands at setup</h2>
+      <p className="mt-3 text-[15px] leading-7 text-muted">
+        Four things, exchanged once. Two come from you, two come from Allo (the signing secret is
+        optional; the minimum tenure is agreed at onboarding).
+      </p>
+      <Table
+        columns={["Item", "Direction", "What it is"]}
+        rows={HANDOVER.map((h) => [h.item, h.from, h.what])}
+      />
 
       <h2 className="mt-10 text-lg font-semibold">The two URLs</h2>
       <Table

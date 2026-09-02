@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Table } from "@/components/Table";
 import { FrameworkTabs } from "@/components/FrameworkTabs";
-import { HEADERS, SECRETS } from "@/content/spec";
+import {
+  API_KEY_EXAMPLE,
+  CREDENTIALS,
+  HEADERS,
+  SECRETS,
+  SIGNING_SECRET_EXAMPLE,
+} from "@/content/spec";
 
 export const metadata: Metadata = {
   title: "Authentication",
@@ -23,13 +29,64 @@ export default function AuthPage() {
         rows={SECRETS.map((s) => [s.name, s.who])}
       />
 
-      {/* --- Section 1: API key --- */}
-      <h2 className="mt-10 text-lg font-semibold">API key</h2>
+      {/* --- Section 1: the two secrets --- */}
+      <h2 className="mt-10 text-lg font-semibold">The two secrets</h2>
       <p className="mt-3 text-[15px] leading-7 text-muted">
-        You create the API key and give it to Allo during onboarding. Allo sends it on every
-        request as <code className="font-mono text-accent">X-Allo-Key</code>. Reject a missing or
-        wrong key with <strong>401</strong>.
+        There are two, and they travel in opposite directions. You create the{" "}
+        <strong>API key</strong> and give it to Allo. Allo creates the{" "}
+        <strong>signing secret</strong> and gives it to you. They are different values — do not
+        use one where the other is expected.
       </p>
+      <Table
+        columns={["Secret", "Created by", "Handed over", "Allo stores it as", "You store it as"]}
+        rows={CREDENTIALS.map((c) => [
+          c.label,
+          c.createdBy,
+          c.direction,
+          c.alloEnv,
+          c.partnerEnv,
+        ])}
+      />
+      <p className="text-[15px] leading-7 text-muted">
+        <code className="font-mono text-accent">{"{PARTNER}"}</code> is your platform name. You do
+        not need to know Allo&apos;s variable names — they are shown only so both sides can point
+        at the same value when something needs checking.
+      </p>
+
+      <h3 className="mt-8 text-[15px] font-semibold">The difference, in one line each</h3>
+      <p className="mt-2 text-[15px] leading-7 text-muted">
+        <strong>The API key is like a keycard.</strong> You issue it, Allo swipes it every time it
+        arrives, and you check it at the door. It travels on every request.
+      </p>
+      <p className="mt-3 text-[15px] leading-7 text-muted">
+        <strong>The signing secret is like a wax seal.</strong> It never travels. Both sides keep
+        a copy and use it to work out the same fingerprint independently. If your fingerprint
+        matches the one Allo sent, the request is genuine and nothing in it was changed on the
+        way.
+      </p>
+      <p className="mt-3 text-[15px] leading-7 text-muted">
+        Why both? A keycard can be stolen, and whoever holds it can walk in. The seal cannot be
+        copied, because there is nothing on the wire to steal. The key gets you working; the seal
+        makes it safe.
+      </p>
+
+      <h3 className="mt-8 text-[15px] font-semibold">Example 1 — API key (you → Allo)</h3>
+      <p className="mt-2 text-[15px] leading-7 text-muted">
+        Sent on every request. This is the one Allo puts in a header.
+      </p>
+      <CodeBlock code={API_KEY_EXAMPLE} label="api key" language="bash" />
+      <p className="text-[15px] leading-7 text-muted">
+        Reject a missing or wrong key with <strong>401</strong>.
+      </p>
+
+      <h3 className="mt-8 text-[15px] font-semibold">
+        Example 2 — Signing secret (Allo → you)
+      </h3>
+      <p className="mt-2 text-[15px] leading-7 text-muted">
+        Never sent. Both sides hold a copy and use it to compute the same hash independently —
+        that is what makes the signature proof of origin.
+      </p>
+      <CodeBlock code={SIGNING_SECRET_EXAMPLE} label="signing secret" language="bash" />
 
       {/* --- Section 2: HMAC signing --- */}
       <h2 className="mt-10 text-lg font-semibold">Request signing (HMAC-SHA256)</h2>

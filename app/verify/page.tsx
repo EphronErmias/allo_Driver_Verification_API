@@ -3,10 +3,13 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { Table } from "@/components/Table";
 import {
   EXAMPLE_VERIFY_URL,
+  FAILURE_EXAMPLES,
   FAILURE_JSON,
+  INCOMPLETE_SUCCESS_NOTE,
+  REGISTERED_SINCE_PARSE_NOTE,
   SUCCESS_FIELDS,
   SUCCESS_JSON,
-  TOO_NEW_JSON,
+  TENURE_OVERRIDE_NOTE,
   VERIFY_REQUEST_CURL,
   VERIFY_REQUEST_HTTP,
 } from "@/content/spec";
@@ -35,34 +38,44 @@ export default function VerifyPage() {
       />
 
       <h2 className="mt-10 text-lg font-semibold">Success response — driver is eligible</h2>
-      <p className="mt-3 text-[15px] leading-7 text-muted">
-        Respond 200. If any of these four fields is missing, Allo treats the driver as not eligible.
-      </p>
+      <p className="mt-3 text-[15px] leading-7 text-muted">{INCOMPLETE_SUCCESS_NOTE}</p>
       <CodeBlock code={SUCCESS_JSON} label="json" language="json" />
       <Table
         columns={["Field", "Type", "Notes"]}
         rows={SUCCESS_FIELDS.map((f) => [f.name, f.type, f.notes])}
       />
-      <p className="text-[15px] leading-7 text-muted">
-        The account must be at least 6 months old. If it is newer, return{" "}
-        <code className="font-mono text-accent">ACCOUNT_TOO_NEW</code>.
-      </p>
+      <p className="mt-3 text-[15px] leading-7 text-muted">{TENURE_OVERRIDE_NOTE}</p>
+      <p className="mt-3 text-[15px] leading-7 text-muted">{REGISTERED_SINCE_PARSE_NOTE}</p>
 
       <h2 className="mt-10 text-lg font-semibold">Failure response — driver is not eligible</h2>
       <p className="mt-3 text-[15px] leading-7 text-muted">
-        If the driver is unknown, still return <strong>200</strong> with{" "}
-        <code className="font-mono text-accent">NOT_FOUND</code>. Use <strong>401</strong> only if
-        the key or signature is wrong.
+        Always return HTTP <strong>200</strong> — the request succeeded, the answer is &quot;not
+        eligible.&quot; Use <strong>401</strong> only if the key or signature is wrong. The{" "}
+        <code className="font-mono text-accent">code</code> tells Allo which outcome it is.
       </p>
-      <CodeBlock code={FAILURE_JSON} label="json" language="json" />
-      <p className="mt-6 text-[15px] leading-7 text-muted">
-        Optional on <code className="font-mono text-accent">ACCOUNT_TOO_NEW</code>:
+      <p className="mt-3 text-[15px] leading-7 text-muted">
+        Every failure uses the same shape — only{" "}
+        <code className="font-mono text-accent">code</code> and{" "}
+        <code className="font-mono text-accent">reason</code> change:
       </p>
-      <CodeBlock code={TOO_NEW_JSON} label="json" language="json" />
+      <CodeBlock code={FAILURE_JSON} label="the shape" language="json" />
       <p className="text-[15px] leading-7 text-muted">
-        <code className="font-mono text-accent">message</code> is optional. If you skip it, Allo
-        uses its own sentence for that reason.
+        <code className="font-mono text-accent">message</code> is optional everywhere. If you skip
+        it, Allo shows its own sentence for that reason — already written and translated. Send one
+        only if you need different wording.
       </p>
+
+      <h3 className="mt-8 text-base font-semibold">All six failure responses</h3>
+      <div className="mt-4 space-y-6">
+        {FAILURE_EXAMPLES.map((f) => (
+          <div key={f.code}>
+            <p className="text-[15px] leading-7 text-muted">
+              <code className="font-mono text-accent">{f.code}</code> · {f.when}
+            </p>
+            <CodeBlock code={f.json} label={f.reason} language="json" />
+          </div>
+        ))}
+      </div>
     </article>
   );
 }

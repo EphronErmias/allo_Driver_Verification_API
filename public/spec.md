@@ -1,16 +1,25 @@
 # Partner driver verification API
 
-You host one **HTTPS** URL. Allo calls it with a driver's phone number. You answer with JSON: is this person an eligible driver on Feres, Yango, or BeU?
+You host one **HTTPS** URL. Allo calls it with a driver's phone number. You answer with JSON: is this person an eligible driver on your platform?
 
 Allo finances mobile phones in Ethiopia. When a driver applies for Allo financing, Allo verifies they are an active, tenured driver on your platform.
 
+**Allo calls you. You never call Allo.**
+
 **API version:** `2026-08-01` (`X-Allo-API-Version`)
 
-## Do this first
+## What changes hands at setup
 
-1. Give Allo an HTTPS URL (not http://)
-2. Create an API key and give it to Allo
-3. Optional: take Allo's signing secret and check `X-Allo-Signature`
+Four things, exchanged once. Two from you, two from Allo (the signing secret is optional; the minimum tenure is agreed at onboarding).
+
+| Item | Direction | What it is |
+|---|---|---|
+| Verify URL | You → Allo | The HTTPS address Allo should call. Allo adds `/health` to it for the health check. |
+| API key | You → Allo | A long random string you invent. Allo sends it back on every request so you know it is Allo. |
+| Signing secret | Allo → You | Optional but recommended. Lets you prove a request really came from Allo and was not changed on the way. |
+| Minimum tenure | Allo (agreed at onboarding) | Allo re-checks `registeredSince` against a per-partner minimum (default 6 months, stored as `{PARTNER}_MIN_MONTHS`). Confirm the agreed value; do not assume 6. |
+
+On Allo's side these are stored as `{PARTNER}_API_URL`, `{PARTNER}_API_KEY`, and `{PARTNER}_SIGNING_SECRET`, where `{PARTNER}` is your platform name.
 
 Allo waits 8 seconds for a driver check and 5 seconds for health. On server error or timeout, Allo retries once after 1 second. A 401 is not retried.
 
@@ -58,46 +67,61 @@ curl -X POST "https://api.partner.example/allo/verify" \
 
 ### Success response — driver is eligible
 
-Respond **200**. If any field is missing, Allo treats the driver as not eligible.
+Respond **200**. On `verified: true`, Allo requires non-empty `fullName`, `driverId`, and `registeredSince`. If any of those three is missing, Allo treats the response as **PARTNER_ERROR** (code **2006**) — the customer is asked to try again shortly. That is deliberately distinct from a genuine “not eligible” answer.
 
 ```json
 {
   "verified": true,
+  "code": 1000,
   "fullName": "Dawit Haile",
-  "driverId": "FERES-0001",
+  "driverId": "DRV-00012",
   "registeredSince": "2023-01-15"
 }
 ```
 
-The account must be at least 6 months old. If it is newer, return `ACCOUNT_TOO_NEW`.
+| Field | Type | Notes |
+|---|---|---|
+| `verified` | boolean | Must be exactly true |
+| `code` | number | 1000 for success |
+| `fullName` | string | Driver display name |
+| `driverId` | string | Stable id in your system |
+| `registeredSince` | string | Account open date. Must be YYYY-MM-DD (ISO-8601 timestamps also parse). An unparseable value is treated as too new and the driver is rejected. |
+
+Allo independently re-checks tenure using the `registeredSince` you send. The minimum is configured per partner on Allo’s side (default 6 months, stored as `{PARTNER}_MIN_MONTHS`). Confirm the agreed value; do not assume 6. A `verified: true` response for an account under that minimum is converted to `ACCOUNT_TOO_NEW` regardless.
+
+**Validation footgun:** `registeredSince` must be `YYYY-MM-DD` (ISO-8601 timestamps also parse). A value Allo cannot parse — for example `15/01/2023` — is treated as too new and the driver is rejected as `ACCOUNT_TOO_NEW`. There is no separate error code.
 
 ### Failure response — driver is not eligible
 
-If the driver is unknown, still return **200** with `NOT_FOUND`. Use **401** only if the key or signature is wrong.
+Always return HTTP **200** — the request succeeded, the answer is "not eligible." Use **401** only if the key or signature is wrong. The `code` field tells Allo which outcome it is.
 
 ```json
 {
   "verified": false,
+  "code": 2001,
   "reason": "NOT_FOUND",
   "message": "No driver account for this phone."
 }
 ```
 
-| `reason` | When to use |
-|---|---|
-| `NOT_FOUND` | No driver for this phone |
-| `INACTIVE` | Account exists but is not active |
-| `ACCOUNT_TOO_NEW` | Account is younger than 6 months |
-| `SUSPENDED` | Temporarily suspended |
-| `BLOCKED` | Permanently not eligible for Allo financing |
-| `PARTNER_ERROR` | Your side failed; Allo tells the customer to try again |
+| `code` | `reason` | When to use |
+|---|---|---|
+| `1000` | — | Driver is eligible (`verified: true`) |
+| `2001` | `NOT_FOUND` | No driver for this phone |
+| `2002` | `INACTIVE` | Account exists but is not active |
+| `2003` | `ACCOUNT_TOO_NEW` | Account is younger than Allo’s minimum tenure (configured per partner, default 6 months). Allo re-checks `registeredSince` even if you sent `verified: true`. An unparseable date is also treated as too new. |
+| `2004` | `SUSPENDED` | Temporarily suspended |
+| `2005` | `BLOCKED` | Permanently not eligible for Allo financing |
+| `2006` | `PARTNER_ERROR` | Partner-side failure, or a `verified: true` body missing `fullName`, `driverId`, or `registeredSince`. Allo tells the customer to try again later. Distinct from a genuine not-eligible answer. |
 
 `message` is optional.
 
 | Your response | What Allo does |
 |---|---|
-| `200` + JSON | Reads `verified` / `reason` |
-| `401` / other 4xx | Does not retry |
+| `200` + verify JSON | Reads `code` / `verified` / `reason`. Aim for this. |
+| `401` or `403` | Treats its own key/signature as rejected — never as an answer about the driver. Not retried, raised to the Allo team. |
+| Any body without a boolean `verified` | Treated as `PARTNER_ERROR`. An error envelope is never read as a driver result. |
+| Other non-2xx carrying valid verify JSON | Still read, so a stray status code does not break a real answer. Send `200` anyway. |
 | `500+` empty body, or timeout | Retries once, then treats you as unreachable |
 
 ## Health check (GET)
@@ -231,10 +255,12 @@ static boolean verifySignature(String rawBody, String sigHeader, String secret, 
 1. Your URL starts with https:// (not http://)
 2. You created an API key and gave it to Allo
 3. Your endpoint returns verified, fullName, driverId, and registeredSince when eligible
-4. Your endpoint returns verified: false with a reason code for ineligible drivers
-5. GET {yourUrl}/health responds 200 within 5 seconds
-6. Your endpoint responds within 8 seconds under load
-7. You handle all 6 reason codes (NOT_FOUND, INACTIVE, ACCOUNT_TOO_NEW, SUSPENDED, BLOCKED, PARTNER_ERROR)
-8. Optional: you verify X-Allo-Signature using the signing secret from Allo
+4. registeredSince is YYYY-MM-DD (or ISO-8601); any other format is treated as too new
+5. You confirmed the agreed minimum tenure with Allo (do not assume 6 months)
+6. Your endpoint returns verified: false with a reason code for ineligible drivers
+7. GET {yourUrl}/health responds 200 within 5 seconds
+8. Your endpoint responds within 8 seconds under load
+9. You handle all 6 reason codes (NOT_FOUND, INACTIVE, ACCOUNT_TOO_NEW, SUSPENDED, BLOCKED, PARTNER_ERROR)
+10. Optional: you verify X-Allo-Signature using the signing secret from Allo
 
 Human pages: `/` `/verify` `/auth` `/health` `/errors`

@@ -1,6 +1,6 @@
 export function FlowDiagram() {
   return (
-    <div className="my-8 overflow-x-auto rounded-lg border border-border bg-code p-6">
+    <div className="my-8 overflow-x-auto border border-border bg-code p-6">
       <div className="mx-auto flex min-w-[520px] max-w-[600px] items-start justify-between gap-3">
         {/* Customer */}
         <div className="flex w-[140px] flex-col items-center gap-2 text-center">

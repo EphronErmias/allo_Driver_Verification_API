@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CodeBlock } from "@/components/CodeBlock";
 import { FlowDiagram } from "@/components/FlowDiagram";
+import { H2 } from "@/components/Heading";
 import { Table } from "@/components/Table";
 import {
   API_VERSION,
@@ -9,6 +10,7 @@ import {
   EXAMPLE_VERIFY_URL,
   HANDOVER,
   RATE_LIMIT_TEXT,
+  VERIFY_REQUEST_CURL,
 } from "@/content/spec";
 
 export const metadata: Metadata = {
@@ -34,7 +36,7 @@ export default function OverviewPage() {
         number an active driver on your platform? — and you answer yes or no.
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">What changes hands at setup</h2>
+      <H2>What changes hands at setup</H2>
       <p className="mt-3 text-[15px] leading-7 text-muted">
         Four things, exchanged once. Two come from you, two come from Allo (the signing secret is
         optional; the minimum tenure is agreed at onboarding).
@@ -44,7 +46,7 @@ export default function OverviewPage() {
         rows={HANDOVER.map((h) => [h.item, h.from, h.what])}
       />
 
-      <h2 className="mt-10 text-lg font-semibold">The two URLs</h2>
+      <H2>The two URLs</H2>
       <Table
         columns={["Method", "URL", "Purpose"]}
         rows={[
@@ -54,13 +56,11 @@ export default function OverviewPage() {
       />
       <CodeBlock code={EXAMPLE_VERIFY_URL} label="your HTTPS URL" />
 
-      {/* HTTPS callout — inline, once, instead of site-wide banner */}
-      <div className="my-4 rounded-lg border border-accent/30 bg-accent/5 px-4 py-3">
+      <div className="my-4 border border-accent/30 bg-accent/5 px-4 py-3">
         <p className="text-sm text-muted">
           <span className="mr-1.5 font-medium text-accent">Note:</span>
           Your URL must start with{" "}
-          <code className="font-mono text-accent">https://</code>. When this doc says
-          &quot;return HTTP 200,&quot; that is a status code — your server still uses HTTPS.
+          <code className="font-mono text-accent">https://</code>.
         </p>
       </div>
 
@@ -71,10 +71,16 @@ export default function OverviewPage() {
         once after 1 second. A 401 or other 4xx is not retried.
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">Rate limits</h2>
+      <H2>Try it</H2>
+      <p className="mt-3 text-[15px] leading-7 text-muted">
+        Replace the URL and key with your own, then run:
+      </p>
+      <CodeBlock code={VERIFY_REQUEST_CURL} label="curl" language="bash" />
+
+      <H2>Rate limits</H2>
       <p className="mt-3 text-[15px] leading-7 text-muted">{RATE_LIMIT_TEXT}</p>
 
-      <h2 className="mt-10 text-lg font-semibold">Before you go live</h2>
+      <H2>Before you go live</H2>
       <ol className="mt-4 list-decimal space-y-2 pl-5 text-[15px] leading-7 text-muted">
         {CHECKLIST.map((item) => (
           <li key={item}>{item}</li>

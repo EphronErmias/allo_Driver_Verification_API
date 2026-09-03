@@ -55,13 +55,20 @@ export function CodeBlock({
   }
 
   return (
-    <div className="group relative my-4 overflow-hidden rounded-lg border border-border bg-code">
+    <div className="group relative my-4 overflow-hidden border border-border bg-code">
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
-        <span className="font-mono text-xs text-muted">{label || "code"}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-muted">{label || "code"}</span>
+          {language && (
+            <span className="font-mono text-[10px] uppercase tracking-wider text-muted/50">
+              {language}
+            </span>
+          )}
+        </div>
         <button
           type="button"
           onClick={copy}
-          className="rounded px-2 py-1 font-mono text-xs text-foreground transition hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="px-2 py-1 font-mono text-xs text-foreground transition hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           {copied ? "Copied" : "Copy"}
         </button>

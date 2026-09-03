@@ -6,7 +6,6 @@ import { FRAMEWORKS, type FrameworkId } from "@/content/spec";
 
 export function FrameworkTabs() {
   const [active, setActive] = useState<FrameworkId>("node");
-  const current = FRAMEWORKS.find((f) => f.id === active) ?? FRAMEWORKS[0];
 
   return (
     <div>
@@ -22,8 +21,8 @@ export function FrameworkTabs() {
               onClick={() => setActive(fw.id)}
               className={`px-3 py-2 text-sm transition ${
                 selected
-                  ? "border-b-2 border-accent text-foreground"
-                  : "text-muted hover:text-foreground"
+                  ? "bg-white text-black font-medium"
+                  : "text-muted hover:bg-white hover:text-black"
               }`}
             >
               {fw.label}
@@ -31,7 +30,16 @@ export function FrameworkTabs() {
           );
         })}
       </div>
-      <CodeBlock code={current.code} label={current.label} language={current.language} />
+      {FRAMEWORKS.map((fw) => (
+        <div
+          key={fw.id}
+          role="tabpanel"
+          className={fw.id === active ? "" : "hidden"}
+          aria-hidden={fw.id !== active}
+        >
+          <CodeBlock code={fw.code} label={fw.label} language={fw.language} />
+        </div>
+      ))}
     </div>
   );
 }

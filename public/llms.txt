@@ -6,7 +6,8 @@ Version: 2026-08-01
 
 ## Pages
 
-- [Full spec](/spec.md)
+- [Full spec (markdown)](/spec.md)
+- [Full spec for agents](/llms-full.txt)
 - [Overview](/)
 - [Verify endpoint](/verify)
 - [Authentication](/auth)

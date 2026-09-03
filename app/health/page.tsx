@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CodeBlock } from "@/components/CodeBlock";
+import { H2 } from "@/components/Heading";
 import { EXAMPLE_HEALTH_URL } from "@/content/spec";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function HealthPage() {
         longer than 5 seconds, is reported as down in Allo admin.
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">Example response</h2>
+      <H2>Example response</H2>
       <CodeBlock code={`"ok"`} label="body" />
       <p className="text-[15px] leading-7 text-muted">
         The body content does not matter — Allo only checks the status code. Returning{" "}

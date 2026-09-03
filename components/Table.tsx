@@ -6,7 +6,7 @@ export function Table({
   rows: Array<Array<string>>;
 }) {
   return (
-    <div className="my-4 overflow-x-auto rounded-lg border border-border">
+    <div className="my-4 overflow-x-auto border border-border">
       <table className="w-full border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-border bg-code">

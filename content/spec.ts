@@ -56,13 +56,9 @@ export const SUCCESS_FIELDS = [
 export const INCOMPLETE_SUCCESS_NOTE =
   "Respond 200. On verified: true, Allo requires non-empty fullName, driverId, and registeredSince. If any of those three is missing, Allo treats the response as PARTNER_ERROR (code 2006) — the customer is asked to try again shortly. That is deliberately distinct from a genuine “not eligible” answer.";
 
-/** Allo re-checks tenure from registeredSince and can override verified: true. */
-export const TENURE_OVERRIDE_NOTE =
-  "Allo independently re-checks tenure using the registeredSince you send. The minimum is configured per partner on Allo’s side (default 6 months, stored as {PARTNER}_MIN_MONTHS). Confirm the agreed value; do not assume 6. A verified: true response for an account under that minimum is converted to ACCOUNT_TOO_NEW regardless.";
-
-/** Unparseable registeredSince is a silent ACCOUNT_TOO_NEW, not a distinct error. */
-export const REGISTERED_SINCE_PARSE_NOTE =
-  "Validation footgun: registeredSince must be YYYY-MM-DD (ISO-8601 timestamps also parse). A value Allo cannot parse — for example 15/01/2023 — is treated as too new and the driver is rejected as ACCOUNT_TOO_NEW. There is no separate error code.";
+/** Tenure re-check and date parsing, combined into one note. */
+export const TENURE_NOTE =
+  "Allo independently re-checks tenure using the registeredSince you send. The minimum is configured per partner (default 6 months) — confirm the agreed value, do not assume 6. A verified: true response for an account under that minimum is converted to ACCOUNT_TOO_NEW regardless. The date must be YYYY-MM-DD (ISO-8601 timestamps also parse). An unparseable value — for example 15/01/2023 — is treated as too new.";
 
 export const REASONS = [
   {
@@ -166,7 +162,7 @@ export const HANDOVER = [
   {
     item: "Minimum tenure",
     from: "Allo (agreed at onboarding)",
-    what: "Allo re-checks registeredSince against a per-partner minimum (default 6 months, stored as {PARTNER}_MIN_MONTHS). Confirm the agreed value; do not assume 6.",
+    what: "Allo re-checks registeredSince against a per-partner minimum (default 6 months). Confirm the agreed value; do not assume 6.",
   },
 ] as const;
 
@@ -179,7 +175,6 @@ export const CREDENTIALS = [
     label: "API key",
     createdBy: "You",
     direction: "You → Allo",
-    alloEnv: "{PARTNER}_API_KEY",
     partnerEnv: "ALLO_API_KEY",
     sent: "Yes — on every request, as X-Allo-Key",
   },
@@ -187,7 +182,6 @@ export const CREDENTIALS = [
     label: "Signing secret",
     createdBy: "Allo",
     direction: "Allo → You",
-    alloEnv: "{PARTNER}_SIGNING_SECRET",
     partnerEnv: "ALLO_SIGNING_SECRET",
     sent: "No — never transmitted; it computes X-Allo-Signature",
   },

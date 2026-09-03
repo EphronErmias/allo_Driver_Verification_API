@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { H2 } from "@/components/Heading";
 import { Table } from "@/components/Table";
 import { REASONS, STATUS_BEHAVIOUR } from "@/content/spec";
 
@@ -18,13 +19,13 @@ export default function ErrorsPage() {
         <strong>401</strong> only if the key or signature is wrong.
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">Response codes</h2>
+      <H2>Response codes</H2>
       <Table
         columns={["code", "reason", "When to use"]}
         rows={REASONS.map((r) => [String(r.code), r.reason, r.when])}
       />
 
-      <h2 className="mt-10 text-lg font-semibold">What Allo does with your response</h2>
+      <H2>What Allo does with your response</H2>
       <Table
         columns={["Your response", "What Allo does"]}
         rows={STATUS_BEHAVIOUR.map((s) => [s.status, s.behaviour])}

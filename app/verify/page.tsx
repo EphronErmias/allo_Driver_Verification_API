@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { CodeBlock } from "@/components/CodeBlock";
+import { H2, H3 } from "@/components/Heading";
 import { Table } from "@/components/Table";
 import {
   EXAMPLE_VERIFY_URL,
   FAILURE_EXAMPLES,
   FAILURE_JSON,
   INCOMPLETE_SUCCESS_NOTE,
-  REGISTERED_SINCE_PARSE_NOTE,
   SUCCESS_FIELDS,
   SUCCESS_JSON,
-  TENURE_OVERRIDE_NOTE,
+  TENURE_NOTE,
   VERIFY_REQUEST_CURL,
   VERIFY_REQUEST_HTTP,
 } from "@/content/spec";
@@ -28,7 +28,7 @@ export default function VerifyPage() {
         <code className="font-mono text-accent">{EXAMPLE_VERIFY_URL}</code>
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">Request</h2>
+      <H2>Request</H2>
       <CodeBlock code={VERIFY_REQUEST_CURL} label="curl (HTTPS)" language="bash" />
       <p className="text-[15px] leading-7 text-muted">Same call, raw:</p>
       <CodeBlock code={VERIFY_REQUEST_HTTP} label="raw HTTPS request" language="http" />
@@ -37,17 +37,16 @@ export default function VerifyPage() {
         rows={[["phone", "string", "Phone with country code, like +2519XXXXXXXX"]]}
       />
 
-      <h2 className="mt-10 text-lg font-semibold">Success response — driver is eligible</h2>
+      <H2>Success response</H2>
       <p className="mt-3 text-[15px] leading-7 text-muted">{INCOMPLETE_SUCCESS_NOTE}</p>
       <CodeBlock code={SUCCESS_JSON} label="json" language="json" />
       <Table
         columns={["Field", "Type", "Notes"]}
         rows={SUCCESS_FIELDS.map((f) => [f.name, f.type, f.notes])}
       />
-      <p className="mt-3 text-[15px] leading-7 text-muted">{TENURE_OVERRIDE_NOTE}</p>
-      <p className="mt-3 text-[15px] leading-7 text-muted">{REGISTERED_SINCE_PARSE_NOTE}</p>
+      <p className="mt-3 text-[15px] leading-7 text-muted">{TENURE_NOTE}</p>
 
-      <h2 className="mt-10 text-lg font-semibold">Failure response — driver is not eligible</h2>
+      <H2>Failure response</H2>
       <p className="mt-3 text-[15px] leading-7 text-muted">
         Always return HTTP <strong>200</strong> — the request succeeded, the answer is &quot;not
         eligible.&quot; Use <strong>401</strong> only if the key or signature is wrong. The{" "}
@@ -65,7 +64,7 @@ export default function VerifyPage() {
         only if you need different wording.
       </p>
 
-      <h3 className="mt-8 text-base font-semibold">All six failure responses</h3>
+      <H3>All six failure responses</H3>
       <div className="mt-4 space-y-6">
         {FAILURE_EXAMPLES.map((f) => (
           <div key={f.code}>
